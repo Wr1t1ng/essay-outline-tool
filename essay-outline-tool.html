@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Essay Outliner</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --ink-faint: #8888aa;
+    --paper: #faf9f6;
+    --paper-warm: #f3f0e8;
+    --rule: #e0ddd4;
+    --accent: #2d6a4f;
+    --accent-light: #d8f3dc;
+    --accent-hover: #1b4332;
+    --amber: #b5451b;
+    --amber-light: #fff0e8;
+    --purple: #5e35b1;
+    --purple-light: #ede7f6;
+    --red: #c0392b;
+    --red-light: #fdecea;
+    --blue: #1565c0;
+    --blue-light: #e3f0ff;
+    --shadow-sm: 0 1px 3px rgba(26,26,46,0.08), 0 1px 2px rgba(26,26,46,0.04);
+    --shadow-md: 0 4px 12px rgba(26,26,46,0.10), 0 2px 4px rgba(26,26,46,0.06);
+    --shadow-lg: 0 8px 24px rgba(26,26,46,0.12), 0 4px 8px rgba(26,26,46,0.06);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: var(--ink);
+    color: white;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+  }
+
+  .app-header .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+  }
+
+  .app-header .logo svg { opacity: 0.9; }
+
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 7px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+
+  .btn-secondary {
+    background: transparent;
+    color: white;
+    border: 1.5px solid rgba(255,255,255,0.3);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+  .btn-outline {
+    background: white;
+    color: var(--ink);
+    border: 1.5px solid var(--rule);
+  }
+  .btn-outline:hover { background: var(--paper-warm); border-color: var(--ink-faint); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-light);
+    padding: 6px 10px;
+  }
+  .btn-ghost:hover { background: var(--paper-warm); color: var(--ink); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 1.5px solid transparent;
+    font-size: 0.85rem;
+    padding: 5px 10px;
+  }
+  .btn-danger:hover { background: var(--red-light); border-color: var(--red); }
+
+  .btn-sm { padding: 5px 12px; font-size: 0.82rem; }
+  .btn-xs { padding: 4px 8px; font-size: 0.78rem; }
+
+  /* ── DASHBOARD ── */
+  #dashboard { padding: 3rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .dashboard-hero {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .dashboard-hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.03em;
+  }
+
+  .dashboard-hero p {
+    color: var(--ink-faint);
+    font-size: 1.05rem;
+  }
+
+  .new-outline-form {
+    background: white;
+    border: 1.5px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    animation: slideDown 0.2s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .new-outline-form label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .form-row { display: flex; gap: 10px; align-items: stretch; }
+
+  .form-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1.5px solid var(--rule);
+    border-radius: 7px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--paper);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-row input:focus { border-color: var(--accent); }
+
+  .outlines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .outline-card {
+    background: white;
+    border: 1.5px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .outline-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.2s ease;
+  }
+
+  .outline-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .outline-card:hover::before { transform: scaleY(1); }
+
+  .card-icon {
+    width: 40px; height: 40px;
+    background: var(--accent-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--accent);
+  }
+
+  .card-title {
+    font-family: 'Lora', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-meta {
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .card-delete {
+    position: absolute;
+    top: 10px; right: 10px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-faint);
+    padding: 4px;
+    border-radius: 5px;
+    line-height: 1;
+  }
+  .card-delete:hover { color: var(--red); background: var(--red-light); }
+  .outline-card:hover .card-delete { opacity: 1; }
+
+  .empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--ink-faint);
+  }
+
+  .empty-state svg { opacity: 0.25; margin-bottom: 1.5rem; }
+  .empty-state h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.5rem;
+    color: var(--ink-light);
+    margin-bottom: 0.5rem;
+  }
+  .empty-state p { margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+  /* ── EDITOR ── */
+  #editor {
+    min-height: calc(100vh - 60px);
+    padding-bottom: 4rem;
+  }
+
+  .editor-header {
+    background: white;
+    border-bottom: 1.5px solid var(--rule);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 58px;
+    gap: 1rem;
+  }
+
+  .editor-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-light);
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 5px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .back-btn:hover { color: var(--ink); background: var(--paper-warm); }
+
+  .essay-title-input {
+    flex: 1;
+    min-width: 0;
+    font-family: 'Lora', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ink);
+    border: none;
+    outline: none;
+    background: transparent;
+    letter-spacing: -0.02em;
+  }
+  .essay-title-input::placeholder { color: var(--rule); }
+
+  .save-status {
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .save-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: savePulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes savePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  .editor-body { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+  /* ── PARAGRAPH CARDS ── */
+  .para-card {
+    background: white;
+    border: 1.5px solid var(--rule);
+    border-radius: var(--radius);
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: cardAppear 0.25s ease;
+  }
+
+  @keyframes cardAppear {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .para-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.2rem;
+    border-bottom: 1.5px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .para-label {
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .para-type-badge {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .badge-intro { background: var(--blue-light); color: var(--blue); }
+  .badge-body { background: var(--accent-light); color: var(--accent); }
+  .badge-conclusion { background: var(--amber-light); color: var(--amber); }
+
+  .para-card-body { padding: 1.2rem; }
+
+  .field-group { margin-bottom: 1rem; }
+
+  .field-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .field-input, .field-textarea {
+    width: 100%;
+    padding: 9px 13px;
+    border: 1.5px solid var(--rule);
+    border-radius: 7px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    background: var(--paper);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .field-input:focus, .field-textarea:focus { border-color: var(--accent); background: white; }
+
+  .field-textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+  }
+
+  /* ── BRAINSTORM ── */
+  .brainstorm-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--purple);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    margin-bottom: 4px;
+    transition: color 0.15s;
+  }
+  .brainstorm-toggle:hover { color: var(--purple); opacity: 0.8; }
+
+  .brainstorm-area {
+    display: none;
+    margin-top: 6px;
+  }
+  .brainstorm-area.open { display: block; }
+
+  .brainstorm-area textarea {
+    width: 100%;
+    padding: 9px 13px;
+    border: 1.5px solid #d1c4e9;
+    border-radius: 7px;
+    background: var(--purple-light);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    line-height: 1.5;
+    transition: border-color 0.15s;
+  }
+  .brainstorm-area textarea:focus { border-color: var(--purple); }
+
+  /* ── SUB-ITEMS ── */
+  .sub-items { margin-left: 1rem; }
+
+  .sub-item {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    background: var(--paper-warm);
+    border: 1.5px solid var(--rule);
+    border-radius: 7px;
+    padding: 8px 10px;
+  }
+
+  .sub-item-letter {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink-faint);
+    padding-top: 2px;
+    min-width: 16px;
+    font-family: 'Lora', serif;
+  }
+
+  .sub-item-content { flex: 1; min-width: 0; }
+
+  .sub-item input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+    outline: none;
+    padding: 2px 0;
+  }
+  .sub-item input::placeholder { color: var(--ink-faint); }
+
+  .sub-item-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-faint);
+    padding: 2px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .sub-item-delete:hover { color: var(--red); background: var(--red-light); }
+
+  .quote-item {
+    background: #fffbf0;
+    border-color: #f0d48a;
+  }
+
+  .quote-num {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #b8860b;
+    padding-top: 2px;
+    min-width: 16px;
+    font-family: 'Lora', serif;
+  }
+
+  .section-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .add-sub-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    margin-top: 4px;
+    transition: opacity 0.15s;
+  }
+  .add-sub-btn:hover { opacity: 0.7; }
+  .add-detail-btn { color: var(--accent); }
+  .add-quote-btn { color: var(--amber); }
+
+  .add-para-btn {
+    width: 100%;
+    padding: 14px;
+    border: 2px dashed var(--rule);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--ink-faint);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+  .add-para-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  /* ── TIPS ── */
+  .tips-box {
+    margin-top: 2rem;
+    background: var(--blue-light);
+    border: 1.5px solid #b3d0f7;
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .tips-box h3 {
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--blue);
+    margin-bottom: 0.75rem;
+  }
+
+  .tips-box ul { list-style: none; }
+  .tips-box li {
+    font-size: 0.85rem;
+    color: #1a3a6e;
+    padding: 3px 0;
+    display: flex;
+    gap: 6px;
+  }
+  .tips-box li::before { content: '•'; opacity: 0.5; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.5);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: var(--radius);
+    padding: 2rem;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    animation: modalIn 0.2s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.3rem;
+    margin-bottom: 1.25rem;
+    color: var(--ink);
+  }
+
+  .modal label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .modal input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--rule);
+    border-radius: 7px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--paper);
+    outline: none;
+    margin-bottom: 1.25rem;
+    transition: border-color 0.15s;
+  }
+  .modal input:focus { border-color: var(--accent); }
+
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .dashboard-hero h1 { font-size: 1.8rem; }
+    .outlines-grid { grid-template-columns: 1fr; }
+    .app-header { padding: 0 1rem; }
+    #dashboard { padding: 2rem 1rem; }
+    .editor-body { padding: 1.5rem 1rem; }
+    .form-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- APP HEADER -->
+<header class="app-header">
+  <div class="logo" onclick="showDashboard()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+    Essay Outliner
+  </div>
+  <div class="header-actions" id="headerActions"></div>
+</header>
+
+<!-- DASHBOARD VIEW -->
+<div id="dashboardView" class="view active">
+  <div id="dashboard">
+    <div class="dashboard-hero">
+      <h1>Your Essay Outlines</h1>
+      <p>Organize your thoughts, write better essays.</p>
+    </div>
+
+    <div id="newOutlineFormContainer"></div>
+
+    <div id="outlinesContainer"></div>
+  </div>
+</div>
+
+<!-- EDITOR VIEW -->
+<div id="editorView" class="view">
+  <div class="editor-header">
+    <div class="editor-header-left">
+      <button class="back-btn" onclick="showDashboard()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
+      <input type="text" class="essay-title-input" id="essayTitleInput" placeholder="Untitled Essay" oninput="onTitleChange()">
+    </div>
+    <div class="header-actions">
+      <span class="save-status" id="saveStatus" style="display:none">
+        <span class="save-dot"></span> Saving…
+      </span>
+      <button class="btn btn-outline btn-sm" onclick="exportOutline()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Export
+      </button>
+    </div>
+  </div>
+  <div class="editor-body" id="editorBody"></div>
+</div>
+
+<!-- NEW OUTLINE MODAL -->
+<div class="modal-overlay" id="newOutlineModal">
+  <div class="modal">
+    <h2>New Essay Outline</h2>
+    <label>Essay Title</label>
+    <input type="text" id="newOutlineTitleInput" placeholder="e.g., The Impact of Social Media on Society"
+      onkeydown="if(event.key==='Enter') confirmNewOutline()">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmNewOutline()">Create Outline</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'essayOutliner_v1';
+let state = { outlines: [] };
+let currentOutlineId = null;
+let saveTimer = null;
+
+// ── PERSISTENCE ────────────────────────────────────────────────────────
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch(e) { state = { outlines: [] }; }
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getOutline(id) {
+  return state.outlines.find(o => o.id === id);
+}
+
+// ── DEFAULT STRUCTURE ──────────────────────────────────────────────────
+function defaultParagraphs() {
+  return [
+    { id: uid(), type: 'introduction', mainPoint: '', brainstorming: '', introductionFields: { context:'', thesis:'', sources:'' }, sections: [], quotes: [] },
+    { id: uid(), type: 'body', mainPoint: '', brainstorming: '', sections: [], quotes: [] },
+    { id: uid(), type: 'body', mainPoint: '', brainstorming: '', sections: [], quotes: [] },
+    { id: uid(), type: 'body', mainPoint: '', brainstorming: '', sections: [], quotes: [] },
+    { id: uid(), type: 'conclusion', mainPoint: '', brainstorming: '', sections: [], quotes: [] },
+  ];
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+// ── ROUTING ────────────────────────────────────────────────────────────
+function showDashboard() {
+  currentOutlineId = null;
+  document.getElementById('dashboardView').classList.add('active');
+  document.getElementById('editorView').classList.remove('active');
+  renderDashboard();
+}
+
+function showEditor(id) {
+  currentOutlineId = id;
+  document.getElementById('dashboardView').classList.remove('active');
+  document.getElementById('editorView').classList.add('active');
+  renderEditor();
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────────────────
+function renderDashboard() {
+  // header button
+  document.getElementById('headerActions').innerHTML = `
+    <button class="btn btn-primary btn-sm" onclick="openNewOutlineModal()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Outline
+    </button>`;
+
+  const container = document.getElementById('outlinesContainer');
+  const outlines = state.outlines.slice().sort((a,b) => b.updatedAt - a.updatedAt);
+
+  if (outlines.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <h2>No outlines yet</h2>
+        <p>Create your first essay outline to get started!</p>
+        <button class="btn btn-primary" onclick="openNewOutlineModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Create Your First Outline
+        </button>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="outlines-grid">${outlines.map(o => `
+    <div class="outline-card" onclick="showEditor('${o.id}')">
+      <button class="card-delete" onclick="deleteOutline(event,'${o.id}')" title="Delete">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </button>
+      <div class="card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      <div class="card-title">${escHtml(o.title || 'Untitled Essay')}</div>
+      <div class="card-meta">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        ${relativeTime(o.updatedAt)}
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function openNewOutlineModal() {
+  document.getElementById('newOutlineTitleInput').value = '';
+  document.getElementById('newOutlineModal').classList.add('open');
+  setTimeout(() => document.getElementById('newOutlineTitleInput').focus(), 50);
+}
+
+function closeModal() {
+  document.getElementById('newOutlineModal').classList.remove('open');
+}
+
+function confirmNewOutline() {
+  const title = document.getElementById('newOutlineTitleInput').value.trim();
+  if (!title) return;
+  const outline = {
+    id: uid(),
+    title,
+    content: defaultParagraphs(),
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  state.outlines.push(outline);
+  saveState();
+  closeModal();
+  showEditor(outline.id);
+}
+
+function deleteOutline(event, id) {
+  event.stopPropagation();
+  if (!confirm('Delete this outline? This cannot be undone.')) return;
+  state.outlines = state.outlines.filter(o => o.id !== id);
+  saveState();
+  renderDashboard();
+}
+
+// ── EDITOR ─────────────────────────────────────────────────────────────
+function renderEditor() {
+  const outline = getOutline(currentOutlineId);
+  if (!outline) { showDashboard(); return; }
+
+  document.getElementById('headerActions').innerHTML = `
+    <span class="save-status" id="saveStatus" style="display:none">
+      <span class="save-dot"></span> Saving…
+    </span>
+    <button class="btn btn-outline btn-sm" onclick="exportOutline()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Export
+    </button>`;
+
+  document.getElementById('essayTitleInput').value = outline.title || '';
+  renderEditorBody();
+}
+
+function renderEditorBody() {
+  const outline = getOutline(currentOutlineId);
+  if (!outline) return;
+  const paragraphs = outline.content || [];
+  const body = document.getElementById('editorBody');
+
+  const cards = paragraphs.map((p, i) => renderParagraphCard(p, i, paragraphs)).join('');
+
+  body.innerHTML = `
+    <div id="paraCards">${cards}</div>
+    <button class="add-para-btn" onclick="addParagraph()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Body Paragraph
+    </button>
+    <div class="tips-box">
+      <h3>📝 Outlining Tips</h3>
+      <ul>
+        <li><strong>Introduction:</strong> Hook, background info, and thesis statement</li>
+        <li><strong>Body Paragraphs:</strong> Each should focus on one main idea that supports your thesis</li>
+        <li><strong>Supporting Details:</strong> Add evidence, examples, or data</li>
+        <li><strong>Quotes:</strong> Add relevant quotations or sources</li>
+        <li><strong>Conclusion:</strong> Restate thesis and summarize key points</li>
+        <li><strong>Brainstorming:</strong> Use the lightbulb sections to capture rough ideas</li>
+      </ul>
+    </div>`;
+}
+
+function getParagraphLabel(p, i, paragraphs) {
+  if (p.type === 'introduction') return 'Introduction';
+  if (p.type === 'conclusion') return 'Conclusion';
+  const bodyIdx = paragraphs.slice(0, i).filter(x => x.type === 'body').length + 1;
+  return `Body Paragraph ${bodyIdx}`;
+}
+
+function renderParagraphCard(p, i, paragraphs) {
+  const label = getParagraphLabel(p, i, paragraphs);
+  const badgeClass = p.type === 'introduction' ? 'badge-intro' : p.type === 'conclusion' ? 'badge-conclusion' : 'badge-body';
+  const badgeLabel = p.type === 'introduction' ? 'Intro' : p.type === 'conclusion' ? 'Conclusion' : 'Body';
+  const deleteBtn = p.type === 'body' ? `<button class="btn btn-danger btn-xs" onclick="deleteParagraph('${p.id}')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+    </svg>
+    Delete
+  </button>` : '';
+
+  let mainContent = '';
+  if (p.type === 'introduction') {
+    mainContent = `
+      ${renderBrainstorm(p.id, 'para', p.brainstorming, 'Brainstorm Ideas')}
+      <div class="field-group">
+        <label class="field-label">Context and Background Information</label>
+        <textarea class="field-textarea" placeholder="Provide background on your topic…"
+          oninput="updateIntroField('${p.id}','context',this.value)">${escHtml(p.introductionFields?.context||'')}</textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Thesis Statement</label>
+        <textarea class="field-textarea" placeholder="Your main argument or central claim…"
+          oninput="updateIntroField('${p.id}','thesis',this.value)">${escHtml(p.introductionFields?.thesis||'')}</textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Chicago Style Sources Used</label>
+        <textarea class="field-textarea" style="min-height:100px" placeholder="List Chicago style citations used in this essay…"
+          oninput="updateIntroField('${p.id}','sources',this.value)">${escHtml(p.introductionFields?.sources||'')}</textarea>
+      </div>`;
+  } else {
+    mainContent = `
+      <div class="field-group">
+        <label class="field-label">Main Point</label>
+        <input type="text" class="field-input" value="${escHtml(p.mainPoint||'')}"
+          placeholder="${p.type==='conclusion'?'Summarize your argument…':'Main idea for this paragraph…'}"
+          oninput="updateMainPoint('${p.id}',this.value)">
+      </div>
+      ${renderBrainstorm(p.id, 'para', p.brainstorming, 'Brainstorm Ideas')}`;
+  }
+
+  const sections = (p.sections||[]).map((s,si) => `
+    <div class="sub-item" id="sec_${s.id}">
+      <span class="sub-item-letter">${String.fromCharCode(65+si)}.</span>
+      <div class="sub-item-content">
+        <input type="text" value="${escHtml(s.text||'')}" placeholder="Supporting detail…"
+          oninput="updateSection('${p.id}','${s.id}',this.value)">
+        ${renderBrainstorm(s.id, 'sec', s.brainstorming, 'Notes', true)}
+      </div>
+      <button class="sub-item-delete" onclick="deleteSection('${p.id}','${s.id}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+
+  const quotes = (p.quotes||[]).map((q,qi) => `
+    <div class="sub-item quote-item" id="qte_${q.id}">
+      <span class="quote-num">${qi+1}.</span>
+      <div class="sub-item-content">
+        <input type="text" value="${escHtml(q.text||'')}" placeholder="Quote or citation…"
+          oninput="updateQuote('${p.id}','${q.id}',this.value)">
+        ${renderBrainstorm(q.id, 'qte', q.brainstorming, 'Notes', true)}
+      </div>
+      <button class="sub-item-delete" onclick="deleteQuote('${p.id}','${q.id}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+
+  return `
+    <div class="para-card" id="card_${p.id}">
+      <div class="para-card-header">
+        <div class="para-label">
+          ${label}
+          <span class="para-type-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+        ${deleteBtn}
+      </div>
+      <div class="para-card-body">
+        ${mainContent}
+        <div class="section-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Supporting Details
+        </div>
+        <div class="sub-items" id="secs_${p.id}">${sections}</div>
+        <button class="add-sub-btn add-detail-btn" onclick="addSection('${p.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Supporting Detail
+        </button>
+        ${(p.quotes||[]).length > 0 ? `
+        <div class="section-label" style="margin-top:14px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
+          Quotes
+        </div>
+        <div class="sub-items" id="qtes_${p.id}">${quotes}</div>` : `<div class="sub-items" id="qtes_${p.id}" style="display:none">${quotes}</div>`}
+        <button class="add-sub-btn add-quote-btn" onclick="addQuote('${p.id}')" style="margin-top:${(p.quotes||[]).length>0?'4':'14'}px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Quote
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderBrainstorm(id, prefix, value, label, small=false) {
+  const key = `${prefix}_${id}`;
+  const hasContent = value && value.length > 0;
+  const contentNote = hasContent && !small ? `<span style="font-size:0.75rem;color:var(--ink-faint);margin-left:4px">(${value.length} chars)</span>` : '';
+  return `
+    <div class="${small?'':'field-group'}">
+      <button class="brainstorm-toggle" onclick="toggleBrainstorm('${key}')">
+        <svg width="${small?13:14}" height="${small?13:14}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8A6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
+        <span id="bsArrow_${key}">▶</span>
+        ${label}${contentNote}
+      </button>
+      <div class="brainstorm-area" id="bs_${key}">
+        <textarea placeholder="Jot down ideas, evidence, or notes…"
+          oninput="updateBrainstorm('${id}','${prefix}',this.value)">${escHtml(value||'')}</textarea>
+      </div>
+    </div>`;
+}
+
+function toggleBrainstorm(key) {
+  const area = document.getElementById('bs_' + key);
+  const arrow = document.getElementById('bsArrow_' + key);
+  if (!area) return;
+  area.classList.toggle('open');
+  arrow.textContent = area.classList.contains('open') ? '▼' : '▶';
+  if (area.classList.contains('open')) area.querySelector('textarea').focus();
+}
+
+// ── MUTATIONS ──────────────────────────────────────────────────────────
+function getCurrentContent() {
+  return getOutline(currentOutlineId)?.content || [];
+}
+
+function patchOutline(fn) {
+  const outline = getOutline(currentOutlineId);
+  if (!outline) return;
+  fn(outline);
+  outline.updatedAt = Date.now();
+  saveState();
+  scheduleSaveIndicator();
+}
+
+function scheduleSaveIndicator() {
+  const el = document.getElementById('saveStatus');
+  if (el) { el.style.display = 'flex'; }
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (el) el.style.display = 'none';
+  }, 1200);
+}
+
+function onTitleChange() {
+  const val = document.getElementById('essayTitleInput').value;
+  patchOutline(o => { o.title = val; });
+}
+
+function updateMainPoint(pid, val) {
+  patchOutline(o => {
+    const p = o.content.find(x=>x.id===pid);
+    if (p) p.mainPoint = val;
+  });
+}
+
+function updateIntroField(pid, field, val) {
+  patchOutline(o => {
+    const p = o.content.find(x=>x.id===pid);
+    if (p) { p.introductionFields = p.introductionFields||{}; p.introductionFields[field] = val; }
+  });
+}
+
+function updateBrainstorm(id, prefix, val) {
+  patchOutline(o => {
+    if (prefix === 'para') {
+      const p = o.content.find(x=>x.id===id);
+      if (p) p.brainstorming = val;
+    } else if (prefix === 'sec') {
+      o.content.forEach(p => { const s = p.sections.find(x=>x.id===id); if(s) s.brainstorming=val; });
+    } else if (prefix === 'qte') {
+      o.content.forEach(p => { const q = (p.quotes||[]).find(x=>x.id===id); if(q) q.brainstorming=val; });
+    }
+  });
+}
+
+function addSection(pid) {
+  patchOutline(o => {
+    const p = o.content.find(x=>x.id===pid);
+    if (p) p.sections.push({ id: uid(), text: '', brainstorming: '' });
+  });
+  // partial re-render of just that card
+  reRenderCard(pid);
+}
+
+function updateSection(pid, sid, val) {
+  patchOutline(o => {
+    const p = o.content.find(x=>x.id===pid);
+    if (p) { const s = p.sections.find(x=>x.id===sid); if(s) s.text=val; }
+  });
+}
+
+function deleteSection(pid, sid) {
+  patchOutline(o => {
+    const p = o.content.find(x=>x.id===pid);
+    if (p) p.sections = p.sections.filter(x=>x.id!==sid);
+  });
+  reRenderCard(pid);
+}
+
+function addQuote(pid) {
+  patchOutline(o => {
+    const p = o.content.find(x=>x.id===pid);
+    if (p) { p.quotes = p.quotes||[]; p.quotes.push({ id: uid(), text: '', brainstorming: '' }); }
+  });
+  reRenderCard(pid);
+}
+
+function updateQuote(pid, qid, val) {
+  patchOutline(o => {
+    const p = o.content.find(x=>x.id===pid);
+    if (p) { const q = (p.quotes||[]).find(x=>x.id===qid); if(q) q.text=val; }
+  });
+}
+
+function deleteQuote(pid, qid) {
+  patchOutline(o => {
+    const p = o.content.find(x=>x.id===pid);
+    if (p) p.quotes = (p.quotes||[]).filter(x=>x.id!==qid);
+  });
+  reRenderCard(pid);
+}
+
+function deleteParagraph(pid) {
+  if (!confirm('Delete this paragraph? This cannot be undone.')) return;
+  patchOutline(o => { o.content = o.content.filter(x=>x.id!==pid); });
+  renderEditorBody();
+}
+
+function addParagraph() {
+  patchOutline(o => {
+    const newP = { id: uid(), type: 'body', mainPoint: '', brainstorming: '', sections: [], quotes: [] };
+    const conclIdx = o.content.findIndex(x=>x.type==='conclusion');
+    if (conclIdx >= 0) o.content.splice(conclIdx, 0, newP);
+    else o.content.push(newP);
+  });
+  renderEditorBody();
+}
+
+function reRenderCard(pid) {
+  const outline = getOutline(currentOutlineId);
+  if (!outline) return;
+  const idx = outline.content.findIndex(x=>x.id===pid);
+  if (idx < 0) return;
+  const p = outline.content[idx];
+  const label = getParagraphLabel(p, idx, outline.content);
+  const cardEl = document.getElementById('card_' + pid);
+  if (!cardEl) { renderEditorBody(); return; }
+  const tmp = document.createElement('div');
+  tmp.innerHTML = renderParagraphCard(p, idx, outline.content);
+  cardEl.replaceWith(tmp.firstElementChild);
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────
+function exportOutline() {
+  const outline = getOutline(currentOutlineId);
+  if (!outline) return;
+  const { title, content: paragraphs } = outline;
+  let text = `${title}\n${'='.repeat(title.length)}\n\n`;
+  paragraphs.forEach((p, i) => {
+    const lbl = getParagraphLabel(p, i, paragraphs);
+    text += `${lbl}\n${'─'.repeat(lbl.length)}\n`;
+    if (p.type === 'introduction') {
+      if (p.introductionFields?.context) text += `Context and Background:\n${p.introductionFields.context}\n\n`;
+      if (p.introductionFields?.thesis) text += `Thesis Statement:\n${p.introductionFields.thesis}\n\n`;
+      if (p.introductionFields?.sources) text += `Chicago Style Sources:\n${p.introductionFields.sources}\n\n`;
+    } else if (p.mainPoint) {
+      text += `Main Point: ${p.mainPoint}\n`;
+    }
+    if (p.brainstorming?.trim()) text += `💡 Notes: ${p.brainstorming}\n`;
+    if ((p.sections||[]).length > 0) {
+      text += '\nSupporting Details:\n';
+      p.sections.forEach((s, si) => {
+        text += `  ${String.fromCharCode(65+si)}. ${s.text}\n`;
+        if (s.brainstorming?.trim()) text += `     💡 ${s.brainstorming}\n`;
+      });
+    }
+    if ((p.quotes||[]).length > 0) {
+      text += '\nQuotes:\n';
+      p.quotes.forEach((q, qi) => {
+        text += `  ${qi+1}. ${q.text}\n`;
+        if (q.brainstorming?.trim()) text += `     📌 ${q.brainstorming}\n`;
+      });
+    }
+    text += '\n';
+  });
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${title || 'outline'}.txt`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function relativeTime(ts) {
+  const diff = (Date.now() - ts) / 1000;
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff/86400)}d ago`;
+  return new Date(ts).toLocaleDateString();
+}
+
+// Close modal on overlay click
+document.getElementById('newOutlineModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────
+loadState();
+showDashboard();
+</script>
+</body>
+</html>
